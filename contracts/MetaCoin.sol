@@ -3,21 +3,20 @@ pragma solidity ^0.4.18;
 import "openzeppelin-solidity/contracts/token/ERC20/CappedToken.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/PausableToken.sol";
 
-// This is just a simple example of a coin-like contract.
-// It is not standards compatible and cannot be expected to talk to other
-// coin/token contracts. If you want to create a standards-compliant
-// token, see: https://github.com/ConsenSys/Tokens. Cheers!
-
 contract MetaCoin is CappedToken(MetaCoin.CAP), PausableToken {
     // constants
     uint256 public constant CAP = 12*10**6;
     uint256 public constant OWNER_MINT_CAP = 6*10**6;
     uint256 public constant OWNER_MINT_TOKEN_LIMIT = 10**5;
     uint256 public constant USER_MINT_TOKEN_LIMIT = 10**4;
+    string public name;
+    string public symbol;
+
 
     mapping(address => uint) userMintedBalances;
     function MetaCoin() public {
-
+        name = "NAME OF YOUR TOKEN HERE";
+        symbol = "META";
     }
 
     modifier whenNotPaused() {
@@ -35,7 +34,7 @@ contract MetaCoin is CappedToken(MetaCoin.CAP), PausableToken {
         require(totalSupply_.add(_amount) <= cap);
         require(
             (msg.sender == owner && totalSupply_.add(_amount) <= OWNER_MINT_CAP && balances[_to].add(_amount) <= OWNER_MINT_TOKEN_LIMIT) ||
-            (msg.sender == _to && userMintedBalances[_to].add(_amount) <= USER_MINT_TOKEN_LIMIT)
+            (msg.sender == _to && totalSupply_.add(_amount) > OWNER_MINT_CAP && userMintedBalances[_to].add(_amount) <= USER_MINT_TOKEN_LIMIT)
         );
         return modifiedMint(_to, _amount);
     }

@@ -180,3 +180,18 @@ contract('MetaCoin', function(accounts) {
     return assert.equal(balance.valueOf(), 10**5 + 10**4 + 10**3, "Balance of account 2 should be 111000");
   });
 });
+// user mint before totalSupply exceeds limit check
+contract('MetaCoin', function(accounts) {
+  it("should not let a user mint tokens before 6 million token cap is reached", async function() {
+    let instance = await MetaCoin.deployed();
+    let dummyAddress = accounts[2];
+    await instance.mint(dummyAddress, 10**5, {from : accounts[0]});
+    try {
+      await instance.mint(accounts[1], 10**4, {from : accounts[1]});
+    }
+    catch (error){
+      const revertFound = error.message.search('revert') >= 0;
+      assert(revertFound, `Expected "revert", got ${error} instead. Should not let user mint tokens before totalSupply reaches 6 million.`);
+    }
+  });
+});
